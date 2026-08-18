@@ -11,5 +11,5 @@ taking unstructured, raw user transcript data and seamlessly converting it into 
 ## Debrief
 
 - **What worked:** Specific initial prompt persona, task, constraints, format, and interaction were all defined, so the first build landed close to the target.
-- **What broke / felt like a toy:** Fake processing — the "Process" button runs a fixed 1.6s timer and returns mocked insights. It doesn't actually parse meaning from the transcript, so the demo collapses the moment a user pastes real text.
+- **What broke / felt like a toy:** Fake processing- the "Process" button runs a fixed 1.6s timer and returns mocked insights. It doesn't actually parse meaning from the transcript, so the demo collapses the moment a user pastes real text.
 - **What I'd change next pass:** The UI looks like a real tool, but the engine behind it is static demo data and that is something i would like to change in the next pass.
