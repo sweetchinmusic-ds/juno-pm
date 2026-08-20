@@ -14,7 +14,7 @@ This repo is my final project for the **AI Product Management Certification**. E
 
 ### M1 · Prompting
 - **System prompt** — [`01-prompting/system-prompt.md`](01-prompting/system-prompt.md)
-- **Lovable prototype** — _(share URL)_
+- **Lovable prototype** — https://lovable.dev/projects/d89ac9db-9f54-484e-a9da-54818f16676c
 
 ### M2 · Strategy
 - **Decision matrix** — [`02-strategy/decision-matrix.md`](02-strategy/decision-matrix.md)
