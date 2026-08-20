@@ -1,27 +1,37 @@
-# AI Strategy One-Pager · Juno
+# AI Strategy One-Pager - Juno Automated Prioritization
 
-> Module 2 · Strategy. Built with the **M2 · AI Strategy One-Pager Builder** (informed by the Three-Layer Model Mapper). Paste the tool's markdown over this file.
+## 1. Problem & Workflow
 
-## The bet
+The Problem: resolving host-guest damage claims is slow, emotionally charged, and inconsistent across support agents.
 
-_The one-sentence strategic bet._
+Prevention: explicitly prevents 'arbitrary settlement' - a human agent issuing a refund or charge based on gut feeling rather than a cross-referenced audit of house rules and check-in photos.
 
-_____
+## 2. Target Metrics
 
-## Three-layer model
+Resolution Cycle Time: reduction in time-to-closed-claim from 72 hours to 15 minutes.
 
-- **Model layer:** _which model(s), and why._
-- **Data / retrieval layer:** _what proprietary data or context creates advantage._
-- **Product layer:** _the experience users actually pay for._
+Leadership proof: 20% reduction in appeal rates - both guests and hosts accept the AI's first decision more often than a human's, proving the logic is fairer and more defensible.
 
-## Why now
+## 3. Autonomy Level
 
-_Market timing + why this is defensible._
+Choice: Copilot. AI reviews evidence and drafts the decision letter with a recommended payout; a human supervisor must click 'approve' for any transaction over $500.
 
-_____
+Explicitly avoiding: Agent. We will not give AI end-to-end autonomy to move money out of user bank accounts without a safety valve - a single error in damage assessment is a trust-erosion event hard to undo.
 
-## Success metric
+## 4. Data & Model Approach
 
-_The single number that says the bet paid off._
+Approach: Ground (RAG). Ground the model in the specific house rules of that listing and the metadata from uploaded photos (timestamps/location) to verify when damage occurred.
 
-_____
+Explicitly avoiding: generic LLM (Buy). Using a general model without RAG grounding would lead to hallucinations of standard policies that might contradict the host's specific legal house rules.
+
+## 5. Risks & Mitigations
+
+Risk: if the training data for past human settlements favoured Power Hosts, the AI might instinctively penalise new guests in any dispute - a 'one-way door' where guests stop using the platform and structural bias compounds.
+
+Mitigation: a hard eval gate where 5% of all AI-mediated decisions are blind-reviewed by a third-party legal team to ensure parity between guest and host outcomes.
+
+## 6. V1 Scope
+
+In: claims under $1,000 involving physical property damage with photo evidence.
+
+Out: (1) personal injury claims, (2) disputes involving local noise ordinances. Both require human judgement that the model cannot reliably reproduce.
