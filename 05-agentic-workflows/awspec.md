@@ -18,34 +18,34 @@ New message posts to Slack #escalations tagged P0 or P1 AND thread length ≥ 3 
 
 | Step | Action | Tool / model | Guardrail |
 |---|---|---|---|
-| 1 | Read the triggering P0/P1 thread from Slack #escalations. | slack.read_thread(channel, thread_ts) : read-only corpus.retrieve(query, team_id, k=10) : read-only jira.get_ticket(ticket_id) : read-only notion.get_page(page_id) : read-only rerank.score(query, chunks) : read-only slack.post_draft(channel, blocks) : write — #pm-daily and #pm-juno-review only | Agent can READ Slack #escalations, the vector corpus, Jira ROCKET tickets, and Notion Product pages — all scoped to the caller's team_id (tenant isolation). Agent can WRITE only by posting a draft to #pm-daily (success) or #pm-juno-review (escalation). Agent CANNOT edit or create Jira tickets, edit Notion pages, send external messages (email/Intercom/customer Slack), or retrieve ARR/contract data. No cross-team reads — team_id filter is enforced pre-retrieval. |
+| 1 | Read the triggering P0/P1 thread from Slack #escalations. | slack.read_thread(channel, thread_ts) : read-only corpus.retrieve(query, team_id, k=10) : read-only jira.get_ticket(ticket_id) : read-only notion.get_page(page_id) : read-only rerank.score(query, chunks) : read-only slack.post_draft(channel, blocks) : write — #pm-daily requires all risks confidence ≥ 70%; #pm-juno-review (escalation) has no confidence gate | Agent can READ Slack #escalations, the vector corpus, Jira ROCKET tickets, and Notion Product pages — all scoped to the caller's team_id (tenant isolation). Agent can WRITE only by posting a draft to #pm-daily (success) or #pm-juno-review (escalation). Agent CANNOT edit or create Jira tickets, edit Notion pages, send external messages (email/Intercom/customer Slack), or retrieve ARR/contract data. No cross-team reads — team_id filter enforced pre-retrieval. |
 | 2 | Retrieve related evidence (Jira ROCKET tickets, Notion PRDs) + strategy doc via hybrid RAG, top-k=10. | _ |  |
 | 3 | Score the top 3 risks 1-5 for severity and attach a confidence score per risk. | _ |  |
 | 4 | Draft the ranked risk table with a cited source ID for every row. | _ |  |
-| 5 | Route on confidence: if all risks ≥70%, post draft to #pm-daily; if any <70%, hand off to #pm-juno-review and tag @on-call-pm. | _ |  |
+| 5 | Route on confidence: if all risks ≥ 70%, post draft to #pm-daily; if any < 70%, hand off to #pm-juno-review and tag @on-call-pm. | _ |  |
 
 **Schemas**
 
-slack.read_thread → {messages:[{ts, author, text}], tag} corpus.retrieve → {chunks:[{text, source, score}], status} — status is "ok" or "insufficient_evidence" when <3 relevant chunks (hybrid vector+keyword, top-k=10) jira.get_ticket → {id, summary, status, priority, comments[]} notion.get_page → {title, section, url, text} rerank.score → {chunks:[{text, source, rerank_score}]} (top-20 → top-10) slack.post_draft → {ok, permalink}
+corpus.retrieve → {chunks:[{text, source, section, score}], status} — status is "ok" or "insufficient_evidence" when < 3 relevant chunks (hybrid vector+keyword, top-k=10) slack.read_thread → {messages:[{ts, author, text}], tag} jira.get_ticket → {id, summary, status, priority, comments[]} notion.get_page → {title, section, url, text} rerank.score → {chunks:[{text, source, rerank_score}]} (top-20 → top-10) slack.post_draft → {ok, permalink}
+
+
 
 **Memory (in or out of scope)**
 
 - **Episodic:** In-scope: the reason-act-observe trace for this run — retrieved chunks, per-risk confidence scores, tool calls, and the draft produced. Lifetime: end of run (flushed after PM approves or the run escalates). Persisted only to the eval log (trace_id) for M6 regression, not into agent memory.
-- **Semantic:** In-scope: PM's preferred output format (5-row ranked risk table, citation on every row), the 70% confidence handoff threshold, and the anti-pattern list. Lifetime: indefinite, per-team. Out of scope: never persist customer-specific ARR, contract terms, or names across runs — those are fetched fresh or provided by the PM each time.
-- **Working:** In-scope: the current #escalations thread, its P0/P1 tag and timestamps, the active team ID (for tenant isolation), the loaded strategy document, and the top-k=10 retrieved KB chunks for this query. Lifetime: this run only.
-- **External:** Slack #escalations API (read), Notion Product workspace (read), Jira ROCKET project (read), Strategy KB / vector store (read). All read-only in V1 — no write scope. Slack posts to #pm-daily / #pm-juno-review are the only outbound actions, and they publish a draft, never an external send.
+- **Semantic:** In-scope: PM's preferred output format (5-row ranked risk table, citation on every row), the 70% confidence handoff threshold, and the anti-pattern list. Lifetime: indefinite, per-team. Out of scope: never persist customer-specific ARR, contract terms, or names across runs — fetched fresh or provided by the PM each time.
+- **Working:** In-scope: the current #escalations thread, its P0/P1 tag and timestamps, the active team_id (for tenant isolation), the loaded strategy document, and the top-k=10 retrieved KB chunks for this query. Held in working context only; lifetime this run.
+
+- **External:** Slack #escalations (read), Notion Product workspace (read), Jira ROCKET project (read), Strategy KB / vector store (read). All read-only in V1. Slack posts to #pm-daily / #pm-juno-review are the only outbound actions, and they publish a draft, never an external send.
 
 ## Human-in-the-loop
 
-PM reviews and approves before any output is published — Juno never sends externally. Control passes back to the human PM when: (a) confidence on any P0 risk is < 70%, (b) the request touches contracts, legal, or a regulator, or (c) required evidence (e.g. ARR data) is missing from the corpus. On handoff, Juno posts its draft to #pm-juno-review and tags @on-call-pm.
+PM reviews and approves before any output is published. Control passes back to the human PM when: (a) confidence on any P0 risk is < 70%, (b) the request touches contracts, legal, or a regulator, or (c) required evidence (e.g. ARR data) is missing from the corpus. On handoff, Juno posts its draft to #pm-juno-review and tags @on-call-pm.
 
 ## Success & failure
 
-- **Done when:** Success: ranked top-3 risk table posted to #pm-daily with a citation on every row and all confidence ≥70%.
-Escalation: any P0 risk <70% confidence, or request touches contracts/legal/regulator, or required evidence (e.g. ARR) is missing → hand off to human PM in #pm-juno-review.
-Failure (insufficient evidence): retrieval returns <3 relevant chunks → return "Insufficient evidence to recommend priority" banner, no ranking produced.
-Timeout: no ranked draft within 4s p95 / 30s hard cap → abort the run and alert #pm-juno-ops.
-- **Fails safe when:** Agent can READ Slack #escalations, the vector corpus, Jira ROCKET tickets, and Notion Product pages — all scoped to the caller's team_id (tenant isolation). Agent can WRITE only by posting a draft to #pm-daily (success) or #pm-juno-review (escalation). Agent CANNOT edit or create Jira tickets, edit Notion pages, send external messages (email/Intercom/customer Slack), or retrieve ARR/contract data. No cross-team reads — team_id filter is enforced pre-retrieval.
+- **Done when:** Success: ranked top-3 risk table posted to #pm-daily, a citation on every row, all confidence ≥ 70%. Escalation: any P0 risk < 70% confidence, or request touches contracts/legal/regulator, or required evidence missing → hand off to #pm-juno-review. Failure (insufficient evidence): retrieval returns < 3 relevant chunks → return "Insufficient evidence to recommend priority" banner, no ranking produced. Timeout: no ranked draft within 4s p95 / 30s hard cap → abort and alert #pm-juno-ops.
+- **Fails safe when:** Agent can READ Slack #escalations, the vector corpus, Jira ROCKET tickets, and Notion Product pages — all scoped to the caller's team_id (tenant isolation). Agent can WRITE only by posting a draft to #pm-daily (success) or #pm-juno-review (escalation). Agent CANNOT edit or create Jira tickets, edit Notion pages, send external messages (email/Intercom/customer Slack), or retrieve ARR/contract data. No cross-team reads — team_id filter enforced pre-retrieval.
 
 ## Self-review
 
