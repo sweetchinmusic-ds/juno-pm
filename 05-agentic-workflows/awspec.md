@@ -10,7 +10,7 @@ Cut P0 triage time from 2 hours to 15 minutes (risk mitigation) by turning a raw
 
 ## Trigger
 
-New message posts to Slack #escalations tagged P0 or P1 AND thread length ≥ 3 messages within 10 minutes.
+New message posts to Slack #escalations tagged P0 or P1 AND thread length ≥ 5 messages within 10 minutes.
 
 ## Steps & tools
 
@@ -40,19 +40,4 @@ corpus.retrieve → {chunks:[{text, source, section, score}], status} — status
 
 ## Human-in-the-loop
 
-PM reviews and approves before any output is published. Control passes back to the human PM when: (a) confidence on any P0 risk is < 70%, (b) the request touches contracts, legal, or a regulator, or (c) required evidence (e.g. ARR data) is missing from the corpus. On handoff, Juno posts its draft to #pm-juno-review and tags @on-call-pm.
-
-## Success & failure
-
-- **Done when:** Success: ranked top-3 risk table posted to #pm-daily, a citation on every row, all confidence ≥ 70%. Escalation: any P0 risk < 70% confidence, or request touches contracts/legal/regulator, or required evidence missing → hand off to #pm-juno-review. Failure (insufficient evidence): retrieval returns < 3 relevant chunks → return "Insufficient evidence to recommend priority" banner, no ranking produced. Timeout: no ranked draft within 4s p95 / 30s hard cap → abort and alert #pm-juno-ops.
-- **Fails safe when:** Agent can READ Slack #escalations, the vector corpus, Jira ROCKET tickets, and Notion Product pages — all scoped to the caller's team_id (tenant isolation). Agent can WRITE only by posting a draft to #pm-daily (success) or #pm-juno-review (escalation). Agent CANNOT edit or create Jira tickets, edit Notion pages, send external messages (email/Intercom/customer Slack), or retrieve ARR/contract data. No cross-team reads — team_id filter enforced pre-retrieval.
-
-## Self-review
-
-- [ ] Goal is one sentence and names the value frame.
-- [ ] Trigger is a precise, testable condition.
-- [ ] Pattern is chosen with a defensible reason.
-- [ ] At least 3 stop conditions, including escalation.
-- [ ] Each memory type named (in or out).
-- [ ] Every tool lists scope (read-only vs write) and a schema.
-- [ ] Read/write boundaries match the AI PRD (M3).
+PM reviews and approves before any output is published. Control passes back to the human P
