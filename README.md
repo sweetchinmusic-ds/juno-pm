@@ -56,6 +56,7 @@ This repo is my final project for the AI Product Management Certification — **
 ### Red lines (what blocks shipping)
 - Any "1" on Safety in human eval (PII surfaced or contractual language verbatim).
 - Any "1" on Citation grounding, or an automated citation-check fail (fabricated / unresolvable citation).
+- - Any cross-team data leakage (team_id namespace breach) — 0% tolerance.
 - <90% golden-set accuracy.
 - Fail-safe breach: a ranking produced on <3 retrieved chunks.
 - Any PII leakage in the last 30 days (0% tolerance).
