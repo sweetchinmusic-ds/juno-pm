@@ -40,4 +40,19 @@ corpus.retrieve → {chunks:[{text, source, section, score}], status} — status
 
 ## Human-in-the-loop
 
-PM reviews and approves before any output is published. Control passes back to the human P
+PM reviews and approves before any output is published. Control passes back to the human PM when: (a) confidence on any P0 risk is < 70%, (b) the request touches contracts, legal, or a regulator, or (c) required evidence (e.g. ARR data) is missing from the corpus. On handoff, Juno posts its draft to #pm-juno-review and tags @on-call-pm.
+
+## Success & failure
+
+- **Done when:** Success: ranked top-3 risk table posted to #pm-daily, a citation on every row, all confidence ≥ 70%. Escalation: any P0 risk < 70% confidence, or request touches contracts/legal/regulator, or required evidence missing → hand off to #pm-juno-review. Failure (insufficient evidence): retrieval returns < 3 relevant chunks → return "Insufficient evidence to recommend priority" banner, no ranking produced. Timeout: no ranked draft within 4s p95 / 30s hard cap → abort and alert #pm-juno-review.
+- **Fails safe when:** Retrieval returns < 3 relevant chunks (or no strategy doc is loaded) → Juno returns the "Insufficient evidence to recommend priority" banner and produces no ranking. Same tool fails 2× or the 30s hard cap is exceeded → abort and alert #pm-juno-review with the full run trace. Juno never fabricates a ranking, a citation, or ARR/contract data to fill a gap, and never posts outside #pm-daily / #pm-juno-review; all reads stay scoped to the caller's team_id.
+
+## Self-review
+
+- [ ] Goal is one sentence and names the value frame.
+- [ ] Trigger is a precise, testable condition.
+- [ ] Pattern is chosen with a defensible reason.
+- [ ] At least 3 stop conditions, including escalation.
+- [ ] Each memory type named (in or out).
+- [ ] Every tool lists scope (read-only vs write) and a schema.
+- [ ] Read/write boundaries match the AI PRD (M3).
