@@ -19,9 +19,9 @@ A support engineer tags a Slack #escalations thread P0 or P1 AND the thread cros
 Hybrid RAG retrieval over the Notion strategy doc + Slack/Jira evidence (M3 KB), top-K = 10, reranked from top-20 via Cohere rerank-v3. p95 latency target < 4s end-to-end, per M3 PRD Requirement 1.
 Comparison logic: does the escalation's pain point map to a clause in the strategy doc?
 Dual-citation scoring: emit P0-P3 or notRecommended, requiring both a strategy-clause citation AND an evidence citation.
-Act: write the ranked Insight Card into the Notion PRD draft block via the Notion API, and post a threaded reply in the originating Slack thread via the Slack API.
+Act: post the ranked Insight Card as a draft to #pm-daily (all risks ≥ 70% confidence) or #pm-juno-review (any risk < 70%, legal/contract, or insufficient evidence) via slack.post_draft — V1 is read-only everywhere else, so Juno never writes to Notion or Jira and never posts into the originating #escalations thread.
 Confidence + evidence-floor check: confidence < 70% → escalate to PM; < 3 relevant chunks retrieved OR no strategy doc loaded → withhold the ranking entirely.
-2. "Capturing thread context…" → "Scanning strategy doc + evidence…" → "Cross-referencing thread against strategy pillars…" → "Scoring citations + writing to Notion + Slack…"
+2. "Capturing thread context…" → "Scanning strategy doc + evidence…" → "Cross-referencing thread against strategy pillars…" → "Scoring citations + drafting the risk table + posting to #pm-daily / #pm-juno-review…"
 3. Path A (strategy doc loaded, ≥3 relevant chunks) → grounded P0-P3 with dual citation.
 Path B (strategy doc missing OR < 3 chunks) → Juno withholds the ranking, shows "Insufficient evidence to recommend priority" banner + nudge to load the strategy doc or escalate to PM judgement.
 
@@ -29,7 +29,7 @@ Path B (strategy doc missing OR < 3 chunks) → Juno withholds the ranking, show
 
 **Placement:** Inline & Embedded
 
-Juno posts a threaded reply in the originating Slack #escalations thread with: a P0-P3 (or notRecommended) badge, confidence score, a two-part citation footer (strategy-clause link + evidence link), and Approve / Override / Escalate buttons for one-click action. The same write lands in the Notion PRD draft block (via the Act step), and mirrors into Juno's Insights column for audit history only — not as the primary surface.
+Juno posts a draft to #pm-daily (or #pm-juno-review on escalation) with: a P0-P3 (or notRecommended) badge, confidence score, a two-part citation footer (strategy-clause link + evidence link), and Approve / Override / Escalate buttons for one-click action. It mirrors into Juno's Insights column for audit history only — not as the primary surface. V1 stays read-only: Juno never writes the card into Notion or Jira.
 
 Value prop = Augmentation (M2): the PM validates and edits, Juno never acts autonomously. Risk mitigation is the business value frame (M4) that decides where that augmentation surfaces — proactive flag + reason + one-click action in Slack, not a dashboard tab the PM must remember to open.
 
@@ -37,7 +37,7 @@ Value prop = Augmentation (M2): the PM validates and edits, Juno never acts auto
 
 **Kill switch**
 
-Every Insight Card carries Approve / Override / Escalate buttons directly on the Slack message → re-tag P0-P3, edit either half of the citation pair, or mark notRecommended, without leaving the thread. PRD blocks stay individually editable + regenerable in Notion. This kill switch covers every ranking Juno produces, confidence ≥70% or not.
+Every Insight Card carries Approve / Override / Escalate buttons directly on the Slack draft → re-tag P0-P3, edit either half of the citation pair, or mark notRecommended, without leaving Slack. Because V1 is read-only, nothing lands in Notion until a PM copies the approved draft over manually. This kill switch covers every ranking Juno produces, confidence ≥70% or not.
 
 **Training signal**
 
