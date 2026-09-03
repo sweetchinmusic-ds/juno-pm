@@ -28,7 +28,7 @@ The Notion strategy doc is the one true authority - Slack and Jira are evidence 
 | 1 | Retrieval quality and latency | Must | Top-K = 10 retrieval segments per prioritization run (reranked from top-20 via Cohere rerank-v3). p95 latency target < 4s end-to-end (from "Process" click to ranked PRD draft). At ~$0.02-0.04/1k token blended cost, this lands at $0.05-0.10 per Juno run - cheap enough for daily PM use; instrument actual spend before scaling past one team. |
 | 2 | Fail-safe on empty retrieval | Must | If retrieval returns < 3 relevant segments OR if no strategy doc is loaded, Juno does NOT produce a P0/P1 ranking. Instead it returns a clear banner: "Insufficient evidence to recommend priority - load a strategy document or escalate to PM judgement." This is a feature, not a failure. |
 | 3 | Grounded trust | Must | Every priority Juno produces (P0-P3 or notRecommended) cites at least one strategy clause AND at least one piece of evidence (Jira ticket ID, Slack permalink). The PRD draft renders citations inline as footnotes the PM can click to verify. |
-| 4 | Confidence-gated escalation | Must | Confidence <70% escalates with reasoning ("Low confidence (62%). Suggest @pm-oncall review before acting.") instead of asserting a ranking. |
+| 4 | Confidence-gated escalation | Must | Confidence <70% escalates with reasoning ("Low confidence (62%). Suggest @on-call-pm review before acting.") instead of asserting a ranking. |
 | 5 | Per-team tenant isolation | Must | Team A cannot retrieve Team B's Slack/Jira/Notion data; enforced via per-team pgvector namespace, not a post-hoc filter. |
 
 ## Out of scope
