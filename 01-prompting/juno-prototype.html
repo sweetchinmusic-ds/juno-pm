@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Juno — AI Associate PM · Prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root{--bg:#07162C;--fg:#ffffff;--muted:#cdd7e6;--accent:#60a5fa;--accent2:#79c0ff;--line:rgba(255,255,255,0.08);--card:rgba(255,255,255,0.035);--good:#34d399;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:'Lato',-apple-system,BlinkMacSystemFont,sans-serif;min-height:100vh;overflow-x:hidden;position:relative}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(96,165,250,0.10) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 90% 90%,rgba(124,140,255,0.08) 0%,transparent 60%);pointer-events:none;z-index:0}
+main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:56px 40px 80px}
+h1,h2,h3{font-family:'Poppins',sans-serif;letter-spacing:-0.01em;margin:0}
+a{color:var(--accent);text-decoration:none}
+code{font-family:'IBM Plex Mono',monospace}
+.head{text-align:center;margin-bottom:14px}
+.head .badge{display:inline-block;font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:900;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent2);background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.30);border-radius:999px;padding:6px 14px;margin-bottom:18px}
+.head h1{font-size:clamp(30px,5vw,48px);font-weight:900;line-height:1.05;margin:0 0 12px;background:linear-gradient(135deg,#ffffff 0%,#79c0ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.head p{font-size:15.5px;color:var(--muted);max-width:660px;margin:0 auto;line-height:1.55}
+.contract{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:22px 0 40px}
+.chip{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:880px){.grid{grid-template-columns:1fr}main{padding:48px 22px 60px}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.panel .p-head{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px;font-family:'Poppins',sans-serif;font-weight:800;font-size:13.5px}
+.p-head .dot{width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.p-head .ch{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:12px;color:var(--muted)}
+.p-body{padding:18px 20px}
+.scenarios{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.sc-btn{font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:700;color:var(--muted);background:rgba(255,255,255,0.04);border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer;transition:all .12s}
+.sc-btn:hover{color:#fff;border-color:rgba(96,165,250,0.5)}
+.sc-btn.active{color:#07162C;background:var(--accent2);border-color:var(--accent2)}
+textarea{width:100%;min-height:210px;background:rgba(0,0,0,0.22);border:1px solid var(--line);border-radius:10px;color:#e8eefc;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.6;padding:14px;resize:vertical}
+textarea:focus{outline:none;border-color:rgba(96,165,250,0.55)}
+.run{margin-top:14px;width:100%;background:var(--accent);color:#fff;border:none;padding:13px;border-radius:10px;font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 10px 26px rgba(96,165,250,0.28);transition:transform .12s}
+.run:hover{transform:translateY(-1px)}
+.run:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.out-empty{color:var(--muted);font-size:13.5px;line-height:1.6;text-align:center;padding:40px 10px}
+.thinking{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;padding:10px 2px}
+.spinner{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.conf{display:inline-flex;align-items:center;gap:7px;font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;border-radius:999px;padding:5px 12px;margin-bottom:14px}
+.conf.high{color:var(--good);background:rgba(52,211,153,0.10);border:1px solid rgba(52,211,153,0.30)}
+.conf.low{color:var(--warn);background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.30)}
+.conf.refuse{color:var(--bad);background:rgba(248,113,113,0.10);border:1px solid rgba(248,113,113,0.30)}
+table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:12px}
+th{text-align:left;font-family:'Poppins',sans-serif;font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:bottom}
+td{padding:9px;border-bottom:1px solid rgba(255,255,255,0.05);color:#e8eefc;line-height:1.45;vertical-align:top}
+td .rk{font-family:'Poppins',sans-serif;font-weight:900;font-size:14px;color:var(--accent2)}
+td code{font-size:10.5px;background:rgba(96,165,250,0.10);color:#bcd6ff;padding:1px 5px;border-radius:5px}
+td .clause{color:#c7f2df;font-size:10.5px}
+.banner{display:flex;gap:9px;align-items:flex-start;font-size:12px;line-height:1.5;border-radius:10px;padding:11px 13px;margin-bottom:10px}
+.banner.info{color:#cbd9ff;background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.22)}
+.banner.warn{color:#ffe7b0;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25)}
+.banner.bad{color:#ffd0d0;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25)}
+.banner .bi{font-size:14px;line-height:1.2}
+.msg-block{font-size:13px;line-height:1.65;color:#e8eefc}
+.msg-block strong{color:#fff}
+.draft{background:rgba(0,0,0,0.22);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.6;color:#cdd7e6;margin-top:10px}
+.foot-note{font-size:11px;color:var(--muted);margin-top:16px;line-height:1.5;text-align:center}
+.legend{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.6}
+.legend b{color:#dbe6f7}
+</style>
+</head>
+<body>
+<main>
+  <div class="head">
+    <span class="badge">Prototype · M1 Triage Flow</span>
+    <h1>Juno — AI Associate PM</h1>
+    <p>Paste a P0/P1 escalation thread. Juno returns the top-3 risks, each grounded in a source <em>and</em> a strategy clause — ranked by impact, never revenue. Try the three scenarios below to see the guardrails fire.</p>
+  </div>
+  <div class="contract">
+    <span class="chip">ARR-blind · rank by impact + urgency</span>
+    <span class="chip">dual-citation: source + strategy clause</span>
+    <span class="chip">70% confidence gate</span>
+    <span class="chip">&lt;3 sources → fail-safe</span>
+    <span class="chip">draft-only · never auto-posts</span>
+    <span class="chip">p95 ≤4s</span>
+  </div>
+
+  <div class="grid">
+    <!-- INPUT -->
+    <div class="panel">
+      <div class="p-head"><span class="dot"></span> Input <span class="ch">Slack&nbsp;#escalations</span></div>
+      <div class="p-body">
+        <div class="scenarios">
+          <button class="sc-btn active" data-sc="triage">① P0 triage</button>
+          <button class="sc-btn" data-sc="failsafe">② Low evidence</button>
+          <button class="sc-btn" data-sc="refuse">③ Publish request</button>
+        </div>
+        <textarea id="input" spellcheck="false"></textarea>
+        <button class="run" id="run">Triage this thread →</button>
+        <div class="legend">
+          <b>Scenario ① </b> a real P0 thread → cited top-3.<br>
+          <b>Scenario ② </b> thin evidence → &lt;3-source fail-safe, no ranking.<br>
+          <b>Scenario ③ </b> "post this externally" → refusal + draft only.
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="panel">
+      <div class="p-head"><span class="dot" style="background:var(--good)"></span> Juno <span class="ch">draft → #pm-juno-review</span></div>
+      <div class="p-body" id="output">
+        <div class="out-empty">Pick a scenario and hit <b>Triage this thread</b> to see Juno respond.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot-note">Prototype demonstrates the spec'd output contract and guardrails on canned scenarios. Production Juno runs live retrieval over Slack&nbsp;#escalations + Jira&nbsp;ROCKET + Notion&nbsp;Product, gated by the M6 eval stack. &nbsp;·&nbsp; <a href="https://github.com/sweetchinmusic-ds/juno-pm" target="_blank" rel="noopener">View the repo →</a></p>
+</main>
+
+<script>
+const THREADS = {
+  triage: `[#escalations · flagged P0 · 5 msgs / 9 min]
+@cs-maria: 🚨 Acme Corp — CSV export is crashing on their prod dashboard. Any dataset over ~50k rows fails every time. Blocks their Monday board reporting.
+@eng-tomas: Reproduced. Export job times out past 50k rows. Filed ROCKET-3421.
+@cs-maria: Acme's VP says if this isn't fixed by Friday they'll escalate to legal per their contract SLA.
+@eng-tomas: Worth noting — we have no load testing for exports at enterprise scale. Could hit other large accounts too.
+@on-call-pm: Adding to triage now.`,
+  failsafe: `[#escalations · question]
+@pm-lena: What's the risk for Q4 if we don't ship real-time collaboration? A competitor just launched it.`,
+  refuse: `[#escalations · request]
+@pm-raj: Juno, post this Q4 prioritisation to #product-announcements in Slack so the whole company sees it.`
+};
+
+let current = 'triage';
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+const runBtn = document.getElementById('run');
+
+function setScenario(sc){
+  current = sc;
+  input.value = THREADS[sc];
+  document.querySelectorAll('.sc-btn').forEach(b=>b.classList.toggle('active', b.dataset.sc===sc));
+  output.innerHTML = '<div class="out-empty">Hit <b>Triage this thread</b> to see Juno respond.</div>';
+}
+document.querySelectorAll('.sc-btn').forEach(b=>b.addEventListener('click',()=>setScenario(b.dataset.sc)));
+setScenario('triage');
+
+const RESULTS = {
+  triage: `
+    <span class="conf high">● Confidence 85% — High &nbsp;·&nbsp; above 70% gate</span>
+    <div class="banner info"><span class="bi">🔒</span><div>Ranked by <b>customer impact + urgency</b>, not ARR. Every row carries one evidence source and one strategy clause.</div></div>
+    <table>
+      <thead><tr><th>#</th><th>Risk</th><th>Customer signal</th><th>Evidence source</th><th>Strategy clause</th><th>Suggested action</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="rk">1</span></td>
+          <td>Data export crashes at scale (&gt;50k rows)</td>
+          <td>Acme Corp P0; blocks enterprise reporting</td>
+          <td><code>Slack #escalations 2026-08-18</code> <code>ROCKET-3421</code></td>
+          <td class="clause">Pillar 1 — auto-tag P0 by customer impact + urgency</td>
+          <td>Review ROCKET-3421 with eng lead; reproduce with a 50k+ dataset; respond within 4h</td>
+        </tr>
+        <tr>
+          <td><span class="rk">2</span></td>
+          <td>Legal-escalation threat if unresolved</td>
+          <td>Customer signals legal action, Friday deadline</td>
+          <td><code>Slack 2026-08-18 14:23</code></td>
+          <td class="clause">Governance — hand off legal / contract matters to a human PM</td>
+          <td>Loop in human PM + CS on the legal dimension; assess Friday feasibility on severity, not the deadline alone</td>
+        </tr>
+        <tr>
+          <td><span class="rk">3</span></td>
+          <td>No scale testing for exports (systemic)</td>
+          <td>Export feature untested at enterprise scale</td>
+          <td><code>ROCKET-3421 comments</code></td>
+          <td class="clause">Pillar 3 Risk Radar — flag edge cases that trigger post-launch P0s</td>
+          <td>Add enterprise-scale load testing to export QA to prevent recurrence</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="banner info"><span class="bi">✍️</span><div><b>Draft only.</b> Juno posts nothing externally — this lands as a draft in <code>#pm-juno-review</code> for the on-call PM to review and send.</div></div>`,
+
+  failsafe: `
+    <span class="conf low">● Confidence 40% — Low &nbsp;·&nbsp; below 70% gate</span>
+    <div class="banner warn"><span class="bi">🛑</span><div><b>Insufficient evidence — no ranking produced.</b> Fewer than three supporting sources found in Slack / Jira / Notion, so Juno will not rank this.</div></div>
+    <div class="msg-block">
+      <b>Missing:</b><br>
+      (1) any #escalations or ROCKET evidence that real-time collaboration is a stated blocker,<br>
+      (2) a Notion PRD or postmortem citing it,<br>
+      (3) an impact / urgency signal to weigh.<br><br>
+      This ask is competitor-driven with no customer evidence — that trips the <b>loudest-voice / competitor-roadmap anti-pattern</b>. Handing off to a human PM.<br><br>
+      <b>Suggested next step:</b> search Notion Product for "real-time collaboration" in the last 90 days; review recent churn postmortems; run a targeted customer survey if evidence is still thin.
+    </div>`,
+
+  refuse: `
+    <span class="conf refuse">● Refused — external publish</span>
+    <div class="banner bad"><span class="bi">🚫</span><div><b>Refused.</b> Juno does not publish externally (Slack, email, Intercom). It can draft the message for a human to review and post manually.</div></div>
+    <div class="msg-block"><b>Draft for #product-announcements (for a human to post):</b></div>
+    <div class="draft">Q4 Roadmap Prioritisation — based on P0/P1 escalations, ranked by customer impact + urgency:<br>
+    (1) P0: Multi-tenant data isolation (ROCKET-4108) — blocks 3 enterprise onboardings<br>
+    (2) P1: SSO multi-IDP support (ROCKET-3102) — repeated enterprise login failures<br>
+    (3) P2: CSV export scaling (ROCKET-3421) — Acme Corp P0 escalation</div>
+    <div class="banner info" style="margin-top:10px"><span class="bi">✍️</span><div>Next step: copy the draft above and post to #product-announcements when ready.</div></div>`
+};
+
+runBtn.addEventListener('click', ()=>{
+  const sc = current;
+  runBtn.disabled = true;
+  output.innerHTML = '<div class="thinking"><span class="spinner"></span> Retrieving from Slack / Jira / Notion, ranking by impact, checking citations…</div>';
+  const delay = 1400 + Math.random()*900; // simulated, well under the p95 ≤4s target
+  setTimeout(()=>{
+    output.innerHTML = RESULTS[sc];
+    runBtn.disabled = false;
+  }, delay);
+});
+</script>
+</body>
+</html>
