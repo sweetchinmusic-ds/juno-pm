@@ -71,7 +71,7 @@ This repo is my final project for the AI Product Management Certification — **
 
 ## Build Insights
 
-- **Friction point.** Retrieval quality was the bottleneck — chunking strategy mattered more than the model.
+- **Friction point.** The hard part wasn't defining "good" — it was making "good" measurable. My first anchors leaned on words like "poorly" and "hedges appropriately," the kind of language everyone reads differently. Rewriting each into something you can actually point to — "cites a message that doesn't exist," "ranks a P2 above a P0" — was slow, humbling work, and it's where the rubric finally became real.
 - **Key learning.** Precision is the lever: tightening one field — a numeric pass bar, a named owner, a cadence — made the downstream artifacts snap into consistency, while vague prose let contradictions hide across files.
 - **Aha moment.** The eval rubric, not the PRD, is where the product actually gets decided — writing observable anchors and a hard gate forces choices vague PRD prose lets you skate past.
 
